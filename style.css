@@ -6,11 +6,17 @@ body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    transition: all 0.3s;
 }
 
 *:focus{
     outline: 2px solid rgb(90, 112, 255);
-    border-radius: 10px;
+    border-radius: 5px;
+}
+
+button{
+    cursor: pointer;
+    border: none;
 }
 
 .container {
@@ -80,7 +86,6 @@ a {
     border: none;
     border-radius: 10px;
     padding: 10px;
-    cursor: pointer;
     background: rgb(220, 220, 220);
     margin-right: 20px;
     transition: all 0.2s;
@@ -99,12 +104,10 @@ a {
 
 .apply {
     border-radius: 30px;
-    border: none;
     background: red;
     color: white;
     padding: 10px;
     width: 100%;
-    cursor: pointer;
 }
 
 /* header */
@@ -133,9 +136,9 @@ header {
 }
 
 .profile {
+    cursor: pointer;
     display: flex;
     align-items: center;
-    cursor: pointer;
     border-radius: 30px;
 }
 
@@ -160,16 +163,104 @@ header {
     box-shadow: 0 0 10px black;
 }
 
+.tools {
+    margin-bottom: 40px;
+}
+.lovest {
+    display: flex;
+    align-items: center;
+}
+.all {
+}
+.like {
+}
+
+.line{
+    background: gray;
+    width: 2.5px;
+    height: 30px;
+    margin: 0 5px;
+}
+
+.lovest_btn {
+    border-radius: 10px;
+    background: gainsboro;
+    padding: 5px 10px;
+    font-size: 15px;
+}
+
+.lovest_btn:hover{
+    background: rgb(90, 112, 255);
+    color: white;
+}
+
 .games {
     display: grid;
     grid-template-columns: repeat(8,1fr);
     list-style: none;
 }
 
+li{
+    position: relative;
+}
+
 .game {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.game:hover{
+    transform: scale(1.1);
+}
+
+.game::after{
+    content: '';
+    display: block;
+    width: 0px;
+    height: 2.5px;
+    background: rgb(90, 112, 255);
+    transition: all 0.4s;
+}
+
+.game:hover::after{
+    width: 100%;
+}
+
+.like_btn{
+    border-radius: 50%;
+    position: absolute;
+    right: 70px;
+    top: 20px;
+    width: 0;
+    height:0;
+    background-image: url('/img/heart.png');
+    background-size: 30px;
+    background-repeat: no-repeat;
+    background-position: -1px;
+    transition: all 0.4s;
+}
+.like_btn:hover{
+    background-color: rgb(90, 112, 255);
+    width: 30px;
+    height:30px;
+    right: 0;
+    top: -30px;
+}
+
+.heart{
+    width: 0;
+}
+
+.game:hover ~ .like_btn{
+    background-color: rgb(90, 112, 255);
+    width: 30px;
+    height:30px;
+    right: 0;
+    top: -30px;
+}
+.game:hover ~ .like_btn > .heart{
+    width: 30px;
 }
 
 .game_img {
