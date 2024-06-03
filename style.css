@@ -1,11 +1,16 @@
 body {
-    background: rgb(255, 175, 175);
+    background: rgb(90, 112, 255);
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+*:focus{
+    outline: 2px solid rgb(90, 112, 255);
+    border-radius: 10px;
 }
 
 .container {
@@ -57,7 +62,7 @@ a {
     margin-bottom: 20px;
     border: none;
     outline: none;
-    border-bottom: 2px solid rgb(255, 175, 175);
+    border-bottom: 2px solid rgb(90, 112, 255);
 }
 
 .input_of_img {
@@ -131,7 +136,6 @@ header {
     display: flex;
     align-items: center;
     cursor: pointer;
-    padding: 2px;
     border-radius: 30px;
 }
 
@@ -144,7 +148,7 @@ header {
 .user_name {
     font-size: 20px;
     font-weight: 600;
-    color: rgb(255, 175, 175);
+    color: rgb(90, 112, 255);
 }
 
 /* main */
