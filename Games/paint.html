@@ -12,21 +12,91 @@
             align-items: center;
         }
 
+        .tools {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .inps {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        #lineWidth {
+            margin-right: 10px;
+            background-color: red;
+        }
+
+        #repeat,
+        #save {
+            border-radius: 10px;
+            border: none;
+            background: gainsboro;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-bottom: 5px;
+        }
+
         .Game {
             border: 2px solid black;
+            margin-left: 20px;
+            border-radius: 10px;
         }
     </style>
 </head>
 
 <body>
+    <div class="tools">
+        <div class="inps">
+            <input type="range" id="lineWidth">
+            <input type="color" id="color">
+        </div>
+        <button id="repeat">repeat</button>
+        <button id="save">save</button>
+    </div>
     <canvas width="1000" height="640" class="Game"></canvas>
     <script>
         let Game = document.querySelector('.Game'),
-            ctx = Game.getContext('2d');
+            ctx = Game.getContext('2d'),
+            mouseDown = false;
 
-            Game.addEventListener('mousemove',(e)=>{
-                ctx.fillRect((e.clientX-150),(e.clientY-20),20,20)
-            })
+        const inpLine = document.querySelector('#lineWidth');
+        const inpColor = document.querySelector('#color');
+        const btnRepeat = document.querySelector('#repeat');
+        const btnSave = document.querySelector('#save');
+
+        Game.addEventListener('mousedown', () => {
+            mouseDown = true;
+        })
+        Game.addEventListener('mouseup', () => {
+            mouseDown = false;
+            ctx.beginPath();
+        })
+        inpLine.addEventListener('input', () => {
+            ctx.lineWidth = (inpLine.value - 10);
+        })
+        btnRepeat.addEventListener('click', (e) => {
+            ctx.clearRect(0, 0, Game.width, Game.height);
+        })
+        inpColor.addEventListener('input', () => {
+            ctx.strokeStyle = inpColor.value;
+        })
+        Game.addEventListener('mousemove', (e) => {
+            if (mouseDown) {
+                ctx.lineTo((e.clientX - 245), (e.clientY - 10));
+                ctx.stroke();
+            }
+        })
+
+        btnSave.addEventListener('click', () => {
+            const dataURL = Game.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = dataURL;
+            a.download = 'drawing.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
     </script>
 </body>
 
