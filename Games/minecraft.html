@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>My first three.js app</title>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 200px;
+            height: 200px;
+            text-align: center;
+            z-index: 100;
+            display: inline-block;
+            background: rgb(255, 255, 255);
+            padding: 10px;
+            font-size: 20px;
+            font-family: sans-serif;
+            font-weight: 600;
+            border-radius: 30px;
+            box-shadow: inset 0px 0px 20px 5px rgb(80, 80, 80);
+        }
+
+        .des {
+            margin-top: 30px;
+        }
+
+        .text {
+            font-size: 15px;
+            color: yellow;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="info">Описание
+        <div class="des">
+            <span class="text">это просто экспериментальный хост</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.min.js"
+        integrity="sha512-n8IpKWzDnBOcBhRlHirMZOUvEq2bLRMuJGjuVqbzUJwtTsgwOgK5aS0c1JA647XWYfqvXve8k3PtZdzpipFjgg=="
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://unpkg.com/three@0.126.0/examples/js/controls/OrbitControls.js"></script>
+    <script type="module">
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Добавление освещения
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+
+        const loader = new THREE.GLTFLoader();
+        loader.load('/sword/scene.gltf', (gltf) => {
+            const model = gltf.scene;
+            model.scale.set(1, 1, 1); // Устанавливаем размер модели
+            scene.add(model);
+        });
+        loader.load('/steve/scene.gltf', (gltf) => {
+            const steve = gltf.scene;
+            steve.scale.set(0.1, 0.1, 0.1);
+            steve.position.y = 3
+            scene.add(steve)
+        })
+
+        // Создание геометрии сферы
+        const sphereGeometry = new THREE.SphereGeometry(25, 32, 32);
+        const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.3 });
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        scene.add(sphere);
+
+        camera.position.z = 10; // Изменение позиции камеры для лучшего обзора
+        camera.position.y = 5;
+        camera.lookAt(scene.position);
+
+        // Добавление орбитальных контроллеров
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update(); // Обновление орбитальных контроллеров
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Обработка изменения размеров окна
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>

@@ -65,7 +65,7 @@
         let map = 0;
 
         // Импортируем необходимые компоненты из Matter.js
-        const { Engine, Render, World, Bodies, Mouse, MouseConstraint, Constraint, Body, Runner } = Matter;
+        const { Engine, Render, World, Bodies, Mouse, MouseConstraint, Constraint, Body, Runner, Events } = Matter;
 
         // Создаем движок
         const engine = Engine.create();
@@ -94,6 +94,25 @@
                 fillStyle: 'brown'
             }
         });
+        const border1 = Bodies.rectangle(1000, 300, 20, 600, {
+            isStatic: true,
+            friction: 1,
+            render: {
+                fillStyle: 'red'
+            }
+        });
+        const border2 = Bodies.rectangle(0, 300, 20, 600, {
+            isStatic: true,
+            render: {
+                fillStyle: 'red'
+            }
+        });
+        const border3 = Bodies.rectangle(500, 0, 1000, 20, {
+            isStatic: true,
+            render: {
+                fillStyle: 'red'
+            }
+        });
 
         const player = Bodies.rectangle(900, 550, 50, 50, {
             isStatic: false,
@@ -102,14 +121,14 @@
             }
         });
 
-        const boxA = Bodies.circle(200, 200, 10, { isStatic: true });
-        const boxB = Bodies.circle(220, 200, 10);
-        const boxC = Bodies.circle(240, 200, 10);
-        const boxD = Bodies.circle(260, 200, 10);
-        const boxE = Bodies.circle(280, 200, 10);
-        const boxF = Bodies.circle(300, 200, 10);
-        const boxG = Bodies.circle(320, 200, 10);
-        const boxH = Bodies.circle(340, 200, 10);
+        const boxA = Bodies.circle(300, 400, 10, { isStatic: true });
+        const boxB = Bodies.circle(320, 400, 10);
+        const boxC = Bodies.circle(340, 400, 10);
+        const boxD = Bodies.circle(360, 400, 10);
+        const boxE = Bodies.circle(380, 400, 10);
+        const boxF = Bodies.circle(400, 400, 10);
+        const boxG = Bodies.circle(420, 400, 10);
+        const boxH = Bodies.circle(440, 400, 10);
 
         World.add(engine.world, [boxA, boxB, boxC, boxD, boxE, boxF, boxG, boxH]);
 
@@ -163,8 +182,17 @@
             stiffness: 1
         }));
 
+        const Rectangle = Bodies.rectangle(500, 300, 100, 50, {
+            isStatic: false,
+            render: { fillStyle: 'red' }
+        })
+        const Rectangle2 = Bodies.rectangle(500, 300, 100, 50, {
+            isStatic: false,
+            render: { fillStyle: 'red' }
+        })
+
         // Добавляем объекты в мир
-        World.add(engine.world, [ground, player]);
+        World.add(engine.world, [ground, border1, border2, border3, player, Rectangle, Rectangle2]);
 
         // Создаем объект мыши
         const mouse = Mouse.create(render.canvas);
@@ -185,22 +213,23 @@
 
         // Отслеживание событий мыши для создания нового объекта
         btnC.addEventListener('click', () => {
-            const newCircle = Bodies.circle(500, 300, 10, {});
-            World.add(engine.world, newCircle);
+            const boxA = Bodies.circle(500, 300, 10, {});
+            World.add(engine.world, boxA);
         });
         btnB.addEventListener('click', () => {
             const newRectangle = Bodies.rectangle(500, 300, 50, 50, {
                 render: { fillStyle: 'green' }
             });
             World.add(engine.world, newRectangle);
+            P()
         });
         btnBB.addEventListener('click', () => {
-            const newRectangle = Bodies.rectangle(500, 300, 100, 50, {
+            const newRectangle2 = Bodies.rectangle(500, 300, 100, 50, {
                 friction: 1,
                 density: 0.01,
                 render: { fillStyle: 'gray' }
             });
-            World.add(engine.world, newRectangle);
+            World.add(engine.world, newRectangle2);
         });
         btnTC.addEventListener('click', () => {
             const boxA1 = Bodies.circle(500, 200, 20);
@@ -250,27 +279,65 @@
 
         animate();
 
-        btnUp.addEventListener('click', () => {
-            Body.setVelocity(player, { x: player.velocity.x, y: -10 });
-        });
+        function P() {
+            btnUp.addEventListener('click', () => {
+                if (jump == false) {
+                    Body.setVelocity(player, { x: player.velocity.x, y: -10 });
+                    jump = true
+                }
+            });
 
-        btnLeft.addEventListener('click', () => {
-            Body.setVelocity(player, { x: -5, y: player.velocity.y });
-        });
-
-        btnRight.addEventListener('click', () => {
-            Body.setVelocity(player, { x: 5, y: player.velocity.y });
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'w') {
-                Body.setVelocity(player, { x: player.velocity.x, y: -10 });
-            } else if (e.key === 'a') {
+            btnLeft.addEventListener('click', () => {
                 Body.setVelocity(player, { x: -5, y: player.velocity.y });
-            } else if (e.key === 'd') {
+            });
+
+            btnRight.addEventListener('click', () => {
                 Body.setVelocity(player, { x: 5, y: player.velocity.y });
+            });
+
+            let jump = false
+
+            function Pair(bod) {
+                Events.on(engine, 'collisionStart', (event) => {
+                    const pairs = event.pairs;
+                    pairs.forEach(pair => {
+                        if (pair.bodyA === player || pair.bodyB === player) {
+                            if (pair.bodyA === bod || pair.bodyB === bod) {
+                                jump = false
+                            }
+                        }
+                    });
+                });
             }
-        });
+
+            function Jump() {
+                Pair(boxA);
+                Pair(boxB);
+                Pair(boxC);
+                Pair(boxD);
+                Pair(boxE);
+                Pair(boxF);
+                Pair(boxG);
+                Pair(boxH);
+                Pair(Rectangle);
+                Pair(Rectangle2);
+                Pair(ground);
+            }
+
+            Jump()
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'w' && jump == false) {
+                    Body.setVelocity(player, { x: player.velocity.x, y: -10 });
+                    jump = true
+                } else if (e.key === 'a') {
+                    Body.setVelocity(player, { x: -5, y: player.velocity.y });
+                } else if (e.key === 'd') {
+                    Body.setVelocity(player, { x: 5, y: player.velocity.y });
+                }
+            });
+        }
+
+        P()
         //  Пример установки нового положения
         // Body.setPosition(box, { x: 100, y: 100 });
         // Пример установки нового угла
