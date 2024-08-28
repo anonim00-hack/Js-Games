@@ -212,18 +212,18 @@
         World.add(engine.world, mouseConstraint);
 
         // Отслеживание событий мыши для создания нового объекта
-        btnC.addEventListener('click', () => {
+        btnC.addEventListener('mousedown', () => {
             const boxA = Bodies.circle(500, 300, 10, {});
             World.add(engine.world, boxA);
         });
-        btnB.addEventListener('click', () => {
+        btnB.addEventListener('mousedown', () => {
             const newRectangle = Bodies.rectangle(500, 300, 50, 50, {
                 render: { fillStyle: 'green' }
             });
             World.add(engine.world, newRectangle);
             P()
         });
-        btnBB.addEventListener('click', () => {
+        btnBB.addEventListener('mousedown', () => {
             const newRectangle2 = Bodies.rectangle(500, 300, 100, 50, {
                 friction: 1,
                 density: 0.01,
@@ -231,7 +231,7 @@
             });
             World.add(engine.world, newRectangle2);
         });
-        btnTC.addEventListener('click', () => {
+        btnTC.addEventListener('mousedown', () => {
             const boxA1 = Bodies.circle(500, 200, 20);
             const boxB2 = Bodies.circle(500, 210, 20);
             World.add(engine.world, [boxA1, boxB2]);

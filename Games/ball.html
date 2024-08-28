@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ball</title>
+</head>
+<button class="btnup">up</button>
+<button class="btndown">down</button>
+<button class="btnleft">left</button>
+<button class="btnright">right</button>
+
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.min.js"
+        integrity="sha512-n8IpKWzDnBOcBhRlHirMZOUvEq2bLRMuJGjuVqbzUJwtTsgwOgK5aS0c1JA647XWYfqvXve8k3PtZdzpipFjgg=="
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
+    <script type="module">
+        // Создаем сцену
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        renderer.shadowMap.enabled = true;
+        scene.background = new THREE.Color(0x88AC69);
+
+        // Добавляем освещение
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 10, 7.5);
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
+
+        // Инициализация физического мира
+        const world = new CANNON.World();
+        world.gravity.set(0, -9.82, 0);
+
+        // Создание шара с физикой
+        const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+        const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0xffff00 });
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        sphere.castShadow = true;
+        scene.add(sphere);
+
+        const sphereShape = new CANNON.Sphere(1);
+        const sphereBody = new CANNON.Body({
+            mass: 1,
+            position: new CANNON.Vec3(2, 2, 4)
+        });
+        sphereBody.addShape(sphereShape);
+        world.addBody(sphereBody);
+
+        // Создание бокса (земли) с полностью прозрачным материалом
+        const groundGeometry = new THREE.BoxGeometry(50, 1, 50);
+        const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00, transparent: true, opacity: 0, side: THREE.DoubleSide }); // Полностью прозрачный материал
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.position.y = -2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        const groundShape = new CANNON.Box(new CANNON.Vec3(25, 0.5, 25));
+        const groundBody = new CANNON.Body({ mass: 0 });
+        groundBody.addShape(groundShape);
+        groundBody.position.y = -1;
+        world.addBody(groundBody);
+
+        // Создание барьеров из кубов, которые закрывают все стороны
+        const barrierMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0 }); // Невидимый материал
+        const barrierCubeGeometry = new THREE.BoxGeometry(50, 10, 1); // Барьер размером 50x10x1
+
+        const barriers = [
+            { position: new CANNON.Vec3(0, 5, -25), scale: new CANNON.Vec3(50, 10, 1) }, // Задний барьер
+            { position: new CANNON.Vec3(0, 5, 25), scale: new CANNON.Vec3(50, 10, 1) },  // Передний барьер
+            { position: new CANNON.Vec3(-25, 5, 0), scale: new CANNON.Vec3(1, 10, 50) }, // Левый барьер
+            { position: new CANNON.Vec3(25, 5, 0), scale: new CANNON.Vec3(1, 10, 50) }  // Правый барьер
+        ];
+
+        barriers.forEach(barrier => {
+            const mesh = new THREE.Mesh(barrierCubeGeometry, barrierMaterial);
+            mesh.position.set(barrier.position.x, barrier.position.y, barrier.position.z);
+            scene.add(mesh);
+
+            // Убираем физику для барьеров
+            const barrierShape = new CANNON.Box(barrier.scale);
+            const barrierBody = new CANNON.Body({ mass: 0 }); // Статическое тело
+            barrierBody.addShape(barrierShape);
+            barrierBody.position.set(barrier.position.x, barrier.position.y, barrier.position.z);
+            world.addBody(barrierBody);
+        });
+
+        // Создание развлекательных кубов
+        const funCubeMaterials = [
+            new THREE.MeshStandardMaterial({ color: 0xff0000 }),
+            new THREE.MeshStandardMaterial({ color: 0x00ff00 }),
+            new THREE.MeshStandardMaterial({ color: 0x0000ff }),
+            new THREE.MeshStandardMaterial({ color: 0xffff00 }),
+            new THREE.MeshStandardMaterial({ color: 0xff00ff }),
+            new THREE.MeshStandardMaterial({ color: 0x00ffff })
+        ];
+
+        const funCubeGeometry = new THREE.BoxGeometry(2, 2, 2);
+
+        // Позиции развлекательных кубов
+        const funCubes = [
+            { position: new CANNON.Vec3(-10, 1, -10), material: funCubeMaterials[0] },
+            { position: new CANNON.Vec3(10, 1, -10), material: funCubeMaterials[1] },
+            { position: new CANNON.Vec3(-10, 1, 10), material: funCubeMaterials[2] },
+            { position: new CANNON.Vec3(10, 1, 10), material: funCubeMaterials[3] },
+            { position: new CANNON.Vec3(0, 1, 0), material: funCubeMaterials[4] },
+            { position: new CANNON.Vec3(5, 1, 5), material: funCubeMaterials[5] }
+        ];
+
+        // Хранение связи между мешами и телами
+        const meshToBodyMap = new Map();
+
+        funCubes.forEach(cube => {
+            const mesh = new THREE.Mesh(funCubeGeometry, cube.material);
+            mesh.position.copy(cube.position);
+            scene.add(mesh);
+
+            const funCubeShape = new CANNON.Box(new CANNON.Vec3(1, 1, 1));
+            const funCubeBody = new CANNON.Body({ mass: 1 });
+            funCubeBody.addShape(funCubeShape);
+            funCubeBody.position.copy(cube.position);
+            world.addBody(funCubeBody);
+
+            meshToBodyMap.set(mesh, funCubeBody); // Связываем меш с телом
+        });
+
+        // Обработка пользовательского ввода для управления шаром
+        document.addEventListener('keydown', (event) => {
+            const force = 400;
+            const maxVelocity = 8;
+
+            switch (event.code) {
+                case 'KeyW':
+                    if (sphereBody.velocity.z > -maxVelocity) {
+                        sphereBody.applyForce(new CANNON.Vec3(0, 0, -force), sphereBody.position);
+                    }
+                    break;
+                case 'KeyS':
+                    if (sphereBody.velocity.z < maxVelocity) {
+                        sphereBody.applyForce(new CANNON.Vec3(0, 0, force), sphereBody.position);
+                    }
+                    break;
+                case 'KeyA':
+                    if (sphereBody.velocity.x > -maxVelocity) {
+                        sphereBody.applyForce(new CANNON.Vec3(-force, 0, 0), sphereBody.position);
+                    }
+                    break;
+                case 'KeyD':
+                    if (sphereBody.velocity.x < maxVelocity) {
+                        sphereBody.applyForce(new CANNON.Vec3(force, 0, 0), sphereBody.position);
+                    }
+                    break;
+            }
+
+        });
+
+        const btndown = document.querySelector('.btndown').addEventListener('mousedown', () => {
+            const force = 400;
+            const maxVelocity = 8;
+            if (sphereBody.velocity.z < maxVelocity) {
+                sphereBody.applyForce(new CANNON.Vec3(0, 0, force), sphereBody.position);
+            }
+        })
+        const btnup = document.querySelector('.btnup').addEventListener('mousedown', () => {
+            const force = 400;
+            const maxVelocity = 8;
+            if (sphereBody.velocity.z > -maxVelocity) {
+                sphereBody.applyForce(new CANNON.Vec3(0, 0, -force), sphereBody.position);
+            }
+        })
+        const btnleft = document.querySelector('.btnleft').addEventListener('mousedown', () => {
+            const force = 400;
+            const maxVelocity = 8;
+            if (sphereBody.velocity.x > -maxVelocity) {
+                sphereBody.applyForce(new CANNON.Vec3(-force, 0, 0), sphereBody.position);
+            }
+        })
+        const btnright = document.querySelector('.btnright').addEventListener('mousedown', () => {
+            const force = 400;
+            const maxVelocity = 8;
+            if (sphereBody.velocity.x < maxVelocity) {
+                sphereBody.applyForce(new CANNON.Vec3(force, 0, 0), sphereBody.position);
+            }
+        })
+
+        // Настройка камеры
+        function updateCamera() {
+            camera.position.x = sphere.position.x;
+            camera.position.y = sphere.position.y + 5;
+            camera.position.z = sphere.position.z + 10;
+            camera.lookAt(sphere.position);
+        }
+
+        // Анимация
+        function animate() {
+            requestAnimationFrame(animate);
+            world.step(1 / 60);
+
+            // Обновляем позиции объектов
+            sphere.position.copy(sphereBody.position);
+            sphere.rotation.copy(sphereBody.quaternion);
+
+            // Обновляем позиции кубов с физикой
+            meshToBodyMap.forEach((body, mesh) => {
+                mesh.position.copy(body.position);
+                mesh.quaternion.copy(body.quaternion);
+            });
+
+            renderer.render(scene, camera);
+            updateCamera();
+        }
+        animate();
+
+    </script>
+</body>
+
+</html>

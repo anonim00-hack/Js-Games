@@ -76,12 +76,13 @@
             steve.scale.set(0.1, 0.1, 0.1);
             steve.position.y = 3
             scene.add(steve)
-        })
+        });
 
         // Создание геометрии сферы
-        const sphereGeometry = new THREE.SphereGeometry(25, 32, 32);
-        const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.3 });
+        const sphereGeometry = new THREE.SphereGeometry(1,10,1000);
+        const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000,wireframe:true});
         const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        sphere.position.x =+ 50
         scene.add(sphere);
 
         camera.position.z = 10; // Изменение позиции камеры для лучшего обзора
